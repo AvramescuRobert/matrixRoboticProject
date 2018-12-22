@@ -82,6 +82,7 @@ void setup()
 
 }
 
+//---SENSOR---
 //Read the imput from ultrasonic sensor and measure the distance for motion control
 void readSensor()
 {
@@ -105,7 +106,7 @@ void calibrateSensor()
       }
 }
 
-
+//--- GRAPHICS 8x8 MATRIX---
 void displayCar()
 {
   if (carPositionPre != carPosition)
@@ -120,34 +121,32 @@ void displayMap()
 {
    for (int i = 7; i >= 0; i--)
     for (int j = 7; j >= 0; j--)
-      lc.setLed(0, i, j, matrix[(7 - i + mapPosition) % 45][j]);  
+      lc.setLed(0, i, j, matrix[(7 - i + mapPosition) % 45][j]); // i use %45 because my map is 45x8 and in
 }
 
+//---GAME MECHANICS---
 void verifyColision()
 {
-  for(int j = 0; j <= 7; j++)
+  for (int j = 0; j <= 7; j++)
   {
-    if(matrix[(mapPosition) % 45][j] == 1 && j == carPosition / 3 - 1)
+    if (matrix[(mapPosition) % 45][j] == 1 && j == carPosition / 3 - 1)
       endOfLife();
-   // else Serial.println ("noooo");
   }
-  
 }
 
 void endOfLife()
 {
-    for(int i = 0; i <= 7; i++)
-    for(int j = 0; j <= 7; j++)
+    for (int i = 0; i <= 7; i++)
+    for (int j = 0; j <= 7; j++)
     {
-      if(i == j)
+      if (i == j)
         lc.setLed(0, i, j, true);
-      else if(7 - i == j)
+      else if (7 - i == j)
         lc.setLed(0, i, j, true);
       else lc.setLed(0, i, j, false);
     }  
     numberOfLives--;
-    Serial.println(numberOfLives);
-    if(numberOfLives <= 0)
+    if (numberOfLives <= 0)
       gameStatus = 0;
     else gameStatus = 2;
 }
@@ -157,6 +156,7 @@ void changeLevel()
   delayTime = delayTime - 10;
 }
 
+//---LCD---
 void displayScoreLife()
 {
     clearScreen();
@@ -165,7 +165,7 @@ void displayScoreLife()
     lcd.print(numberOfLives);
     lcd.setCursor(0, 1);
     lcd.print("Score = ");
-    lcd.print (score / 1000); 
+    lcd.print(score / 1000); 
 }
 
 void clearScreen()
@@ -189,7 +189,7 @@ void displayStartGame()
     lcd.print("Press Start");
     lcd.setCursor(0, 1);
     lcd.print("Score = ");
-    lcd.print (score / 1000);
+    lcd.print(score / 1000);
 }
 
 void scoreCalculus()
@@ -197,6 +197,7 @@ void scoreCalculus()
   score = score + (millis() - timeGame);
 }
 
+//---GAME STATUS AND BASIC INSTRUCTIONS---
 void loop()
 {
   if(gameStatus == 0)// this is game over or start of the game
@@ -209,7 +210,7 @@ void loop()
     mapPosition = 0;
     numberOfLives = 3;
     delayTime = 1200;
-    if(digitalRead(buttonPin) == 0)
+    if (digitalRead(BUTTON_PIN) == 0)
     {
       gameStatus = 1;
       score = 0;
@@ -217,35 +218,32 @@ void loop()
     }
       
   }
-  if(gameStatus == 1) // this means game is running
+  if (gameStatus == 1) // this means game is running
   {
     timeGame = millis();
     displayScoreLife();
     readSensor();
     calibrateSensor();
     displayCar();
-    if(millis() - startTimeGame > delayTime)
+    if (millis() - startTimeGame > delayTime)
     {
       displayMap();
       mapPosition++;
       startTimeGame = millis();
-  //    Serial.println(mapPosition);
     }
     verifyColision();
-    if(mapPosition % 20 == 0)
+    if (mapPosition % 20 == 0)
       changeLevel();
     scoreCalculus();
   }
-  
-  if(gameStatus == 2) //this means game is paused because of death, freeze and invincibility for 5s.
+  if (gameStatus == 2) //this means game is paused because of death, freeze and invincibility for 5s.
   {
     displayScoreLife();
     readSensor();
     calibrateSensor();
     displayCar();
     displayMap();
-    if(digitalRead(buttonPin) == 0)
+    if (digitalRead(BUTTON_PIN) == 0)
       gameStatus = 1;
-  }
-  
+  } 
 }
