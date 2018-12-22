@@ -8,16 +8,18 @@ LedControl lc = LedControl(12, 11, 10, 1); //DIN, CLK, LOAD, No. DRIVER
 // pin 10 is connected to LOAD pin 12
 // 1 as we are only using 1 MAX7219
 
-#define trigPin 5
-#define echoPin 6
-#define buttonPin 2
+//---DEFINE SECTION---
+#define TRIG_PIN 5
+#define ECHO_PIN 6
+#define BUTTON_PIN 2
 
+//---DECLARE VARIABLES---
 unsigned long startTimeGame = micros(), timeGame = 0, score = 0;
 float delayTime = 1200;
 int carPositionPre, carPosition = 0, distMicro, mapPosition = 0;
 float distanceObject;
 short gameStatus = 0, numberOfLives = 3;
-char matrix[45][8] //game's map
+char matrix[45][8] //game's map. It's a loop map.
 {
   {0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0},
@@ -40,7 +42,7 @@ char matrix[45][8] //game's map
   {0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 1, 1, 0, 0, 0},
   {0, 0, 0, 1, 1, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 1, 1, 0, 0, 0},
   {1, 0, 0, 0, 0, 0, 0, 1},
   {1, 1, 0, 0, 0, 0, 1, 1},
   {1, 1, 0, 0, 0, 0, 1, 1},
@@ -72,43 +74,41 @@ void setup()
   lc.shutdown(0, false); // turn off power saving, enables display
   lc.setIntensity(0, 2); // sets brightness (0~15 possible values)
   lc.clearDisplay(0);// clear screen
-  pinMode (trigPin, OUTPUT);
-  pinMode (echoPin, INPUT);
-  pinMode(buttonPin, INPUT_PULLUP);
-  //Serial.begin(9600);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
   lcd.begin(16,2);
   lcd.clear();
 
 }
 
+//Read the imput from ultrasonic sensor and measure the distance for motion control
 void readSensor()
 {
-  digitalWrite(trigPin, LOW); //clear trig
+  digitalWrite(TRIG_PIN, LOW); //clear trig
   delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  distMicro = pulseIn(echoPin, HIGH); // time in microseconds
+  digitalWrite(TRIG_PIN, LOW);
+  distMicro = pulseIn(ECHO_PIN, HIGH); // time in microseconds
   distanceObject = 0.034 * distMicro / 2;
-  //Serial.println(distanceObject);
-  //Serial.println("masina = ");
-  //Serial.println(carPosition);
-    //Serial.println(micros());
 }
 
-void calibrateSensor()
+//Sometimes the sensor returns odd numbers like -100 and if you move your hand just a little it can be unstable, so there is an error measure
+void calibrateSensor() 
 {
-    if(distanceObject > 3 && distanceObject < 27)
-      if(abs(carPosition - distanceObject) > 1)
+    if (distanceObject > 3 && distanceObject < 27)
+      if (abs(carPosition - distanceObject) > 1) // here i calculate the error
       {
         carPositionPre = carPosition;
         carPosition = distanceObject; 
       }
 }
 
+
 void displayCar()
 {
-  if(carPositionPre != carPosition)
+  if (carPositionPre != carPosition)
   {
     lc.setLed(0, 7, carPositionPre / 3 - 1, false);
     lc.setLed(0, 7, carPosition / 3 - 1, true);  
@@ -120,7 +120,7 @@ void displayMap()
 {
    for (int i = 7; i >= 0; i--)
     for (int j = 7; j >= 0; j--)
-      lc.setLed(0, i, j, matrix[(7 - i + mapPosition)%45][j]);  
+      lc.setLed(0, i, j, matrix[(7 - i + mapPosition) % 45][j]);  
 }
 
 void verifyColision()
