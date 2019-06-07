@@ -29,8 +29,7 @@ ARDUINO MATRIX GAME
   After you lose all your 3 lives, the game is over. 
   
 ---- References ---- 
-  I tried to do everything myself, so my source of information is on google drive:
-  https://drive.google.com/drive/folders/1cVPcoKMFGZNM7O5pWp-kaflHUb1kmzd-
+  I tried to do everything myself, so my source of information is what I have learned in faculty
 
 ----YouTUbe video----
 https://www.youtube.com/watch?v=t4Onmaao4e4&feature=youtu.be
